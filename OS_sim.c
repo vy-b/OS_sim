@@ -4,8 +4,7 @@ int main()
 {
     initialize_queues();
     int init = start_simulation();
-    PCB* current_running = NULL;
-    while(1)
+    while(init == 0)
     {
         printf("enter command: ");
         char userCommand[1];
@@ -45,11 +44,32 @@ int main()
             printf("enter PID of the process to kill: ");
             int pid;
             scanf("%d",&pid);
-            kill_PCB(pid);
+            int ret = kill_PCB(pid);
+            if (ret == 1) break;
         }
         else if (strcmp("E",userCommand) == 0 || strcmp("e",userCommand) == 0)
         {
-            PCB_exit();
+            int ret = PCB_exit();
+            if (ret == 1) break;
+        }
+        else if (strcmp("Q",userCommand) == 0 || strcmp("q",userCommand) == 0)
+        {
+            printf("time quantum expired. now running process: %d\n",PCB_quantum());
+        }
+        else if (strcmp("T",userCommand) == 0 || strcmp("t",userCommand) == 0)
+        {
+            printf("enter pid of process to check: ");
+            int input;
+            scanf("%d",&input);
+            test_prints(input);
+        }
+        else if (strcmp("R",userCommand) == 0 || strcmp("r",userCommand) == 0)
+        {
+            test_current_running();
+        }
+        else if (strcmp("V",userCommand) == 0 || strcmp("v",userCommand) == 0)
+        {
+            print_everything_inQueue();
         }
     }
 }

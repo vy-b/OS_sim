@@ -17,7 +17,9 @@ struct PCB_s
     int PID;
     int priority;
     state_s state;
-    // place to store message
+    char msg_received[41];
+    PCB* sender;
+    
 };
 
 #define MAX_PID 2046;
@@ -37,4 +39,6 @@ int kill_PCB(int pid_input);
 int PCB_exit();
 
 int generate_newPID(int priority_input);
+
+void cancel_simulation();
 #endif
