@@ -75,7 +75,32 @@ int recvfrom_PCB();
 // return success or failure
 int reply_PCB(int replyto_pid, char* msg);
 
+// find a process in the pool of semaphores.
+// after execution, current pointer of the pool is at the found process
+Sem* find_sem(int sem_ID);
+
+// creates new semaphore
+// uses find_sem to check if sem_ID already exists
+// fails if sem_ID already exists or out of range
+// returns 0 on success, -1 on failure
+int new_sem(int sem_ID, int initial_value);
+
+// executes P on behalf of the current process
+int semaphore_P(int sem_ID);
+
+// executes V on behalf of the current process
+int semaphore_V(int sem_ID);
 
 
-void cancel_simulation();
+/*display priority queues, blocked on send, 
+blocked on receive and blocked on semaphore queues.*/
+void print_everything_inQueue();
+
+/*displays PID, state, priority and place in priority queue of the process whose ID is provided in the parameter. If blocked, 
+display if blocked on send, receive or semaphore.*/
+void test_prints(int pid_input);
+
+ /*display procinfo of the currently running process*/
+void test_current_running();
+
 #endif

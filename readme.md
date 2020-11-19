@@ -1,4 +1,18 @@
 # Interactive Operating System simulation
+## some notes on intentional implementation choices:
+- A currently running process is NOT removed from its priority queue, but rather stay in the first position. When it gets quantum-ed, it will move to the back of the queue.
+
+- A process of priority 0, when quantum-ed, will give CPU to the next process in the same queue, OR a process of lower priorty if there are no other priority 0 processes. If it is the only process running, then it continues running when the time quantum runs out.
+
+- When a process is blocked, it is removed from its queue and moved to the correct blocked queue (send, receive or semaphore)
+
+- When it is unblocked, the process is placed at the back of its original priority queue.
+
+- Reply (Y) does not handle multiple senders, but only the most recent one.
+
+### EXTRA:
+**U**: display procinfo of the currently running process
+
 ## commands:
 **C**: create a process and the ready queue with the appropriate priority. Three ready queues are available: 0, 1, 2.
 
@@ -43,3 +57,5 @@ ______________________________________________
 
 ______________________________________________
 **T**: display priority queues, blocked on send, blocked on receive and blocked on semaphore queues.
+
+_______________________________________________

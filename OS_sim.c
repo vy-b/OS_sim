@@ -33,6 +33,7 @@ int main()
             }
             else
                 printf("Create success. Process ID = %d\n", newPCB);
+            printf("\n");
         }
 
         else if (strcmp("F",userCommand) == 0 || strcmp("f",userCommand) == 0)
@@ -44,6 +45,7 @@ int main()
             }
             else
                 printf("Process forked successfully. Process ID = %d\n",forked);
+            printf("\n");
         }
 
         else if (strcmp("K",userCommand) == 0 || strcmp("k",userCommand) == 0)
@@ -53,15 +55,19 @@ int main()
             scanf("%d",&pid);
             int ret = kill_PCB(pid);
             if (ret == 1) break;
+            printf("\n");
         }
         else if (strcmp("E",userCommand) == 0 || strcmp("e",userCommand) == 0)
         {
             int ret = PCB_exit();
             if (ret == 1) break;
+            printf("\n");
         }
         else if (strcmp("Q",userCommand) == 0 || strcmp("q",userCommand) == 0)
         {
-            printf("time quantum expired. now running process: %d\n",PCB_quantum());
+            PCB_quantum();
+            printf("Quantum executed successfully.\n");
+            printf("\n");
         }
 
         else if (strcmp("S",userCommand) == 0 || strcmp("s",userCommand) == 0)
@@ -72,10 +78,12 @@ int main()
             printf("what is your message? ");
             scanf("%s",send);
             sendto_PCB(pid_input, send);
+            printf("\n");
         }
         else if (strcmp("R",userCommand) == 0 || strcmp("r",userCommand) == 0)
         {
             recvfrom_PCB();
+            printf("\n");
         }
         else if (strcmp("Y",userCommand) == 0 || strcmp("y",userCommand) == 0)
         {
@@ -85,6 +93,7 @@ int main()
             printf("Enter your reply message: ");
             scanf("%s",reply);
             reply_PCB(pid_input,reply);
+            printf("\n");
         }
         else if (strcmp("I",userCommand) == 0 || strcmp("i",userCommand) == 0)
         {
@@ -92,6 +101,7 @@ int main()
             int input;
             scanf("%d",&input);
             test_prints(input);
+            printf("\n");
         }
         else if (strcmp("N",userCommand) == 0 || strcmp("n",userCommand) == 0)
         {
@@ -103,6 +113,7 @@ int main()
             scanf("%d",&initial_value);
             if (new_sem(sem_ID, initial_value) == 0)
                 printf("Create new semaphore success.\n");
+            printf("\n");
         }
         else if (strcmp("P",userCommand) == 0 || strcmp("p",userCommand) == 0)
         {
@@ -110,6 +121,7 @@ int main()
             int sem_id_input;
             scanf("%d",&sem_id_input);
             semaphore_P(sem_id_input);
+            printf("\n");
         }
         else if (strcmp("V",userCommand) == 0 || strcmp("v",userCommand) == 0)
         {
@@ -117,14 +129,18 @@ int main()
             int sem_id_input;
             scanf("%d",&sem_id_input);
             semaphore_V(sem_id_input);
+            printf("\n");
         }
         else if (strcmp("U",userCommand) == 0 || strcmp("u",userCommand) == 0)
         {
+            printf("The currently running process is as following:\n");
             test_current_running();
+            printf("\n");
         }
         else if (strcmp("T",userCommand) == 0 || strcmp("t",userCommand) == 0)
         {
             print_everything_inQueue();
+            printf("\n");
         }
     }
     free(send);
