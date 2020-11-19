@@ -17,7 +17,7 @@ struct PCB_s
     int PID;
     int priority;
     state_s state;
-    char msg_received[41];
+    char* msg_received;
     PCB* sender;
     
 };

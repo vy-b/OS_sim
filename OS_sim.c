@@ -7,7 +7,7 @@ int main()
     while(init == 0)
     {
         printf("enter command: ");
-        char userCommand[1];
+        char userCommand[2];
         scanf("%s",userCommand);
         if (strcmp("C",userCommand) == 0 || strcmp("c",userCommand) == 0)
         {
@@ -56,6 +56,18 @@ int main()
         {
             printf("time quantum expired. now running process: %d\n",PCB_quantum());
         }
+
+        else if (strcmp("S",userCommand) == 0 || strcmp("s",userCommand) == 0)
+        {
+            printf("Which process would you like to send to? Enter PID: \n");
+            int pid_input;
+            scanf("%d",pid_input);
+            char* msg = malloc(sizeof(char)*41);
+            printf("what is your message? ");
+            scanf("%s",msg);
+            sendto_PCB(pid_input, msg);
+        }
+
         else if (strcmp("T",userCommand) == 0 || strcmp("t",userCommand) == 0)
         {
             printf("enter pid of process to check: ");
@@ -70,6 +82,10 @@ int main()
         else if (strcmp("V",userCommand) == 0 || strcmp("v",userCommand) == 0)
         {
             print_everything_inQueue();
+        }
+        else if (strcmp("B",userCommand) == 0 || strcmp("b",userCommand) == 0)
+        {
+            print_blocked_queues();
         }
     }
 }
