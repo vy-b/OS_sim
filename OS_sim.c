@@ -4,6 +4,13 @@ int main()
 {
     initialize_queues();
     int init = start_simulation();
+    if (init == -1)
+    {
+        printf("error starting simulation\n");
+        return 0;
+    }
+    char* send = malloc(sizeof(char)*41);
+    char* reply = malloc(sizeof(char)*41);
     while(init == 0)
     {
         printf("enter command: ");
@@ -14,10 +21,10 @@ int main()
             printf("enter priority: ");
             int priority;
             scanf("%d",&priority);
-            while (priority < 0 || priority >2)
+            if (priority < 0 || priority >2)
             {
-                printf("re-enter priority (0, 1 or 2): ");
-                scanf("%d",&priority);
+                printf("Priority must be 0,1 or 2\n ");
+                continue;
             }
             int newPCB = create_PCB(priority);
             if (newPCB == -1)
@@ -59,33 +66,68 @@ int main()
 
         else if (strcmp("S",userCommand) == 0 || strcmp("s",userCommand) == 0)
         {
-            printf("Which process would you like to send to? Enter PID: \n");
+            printf("Which process would you like to send to? Enter PID: ");
             int pid_input;
-            scanf("%d",pid_input);
-            char* msg = malloc(sizeof(char)*41);
+            scanf("%d",&pid_input);
             printf("what is your message? ");
-            scanf("%s",msg);
-            sendto_PCB(pid_input, msg);
+            scanf("%s",send);
+            sendto_PCB(pid_input, send);
         }
-
-        else if (strcmp("T",userCommand) == 0 || strcmp("t",userCommand) == 0)
+        else if (strcmp("R",userCommand) == 0 || strcmp("r",userCommand) == 0)
         {
-            printf("enter pid of process to check: ");
+            recvfrom_PCB();
+        }
+        else if (strcmp("Y",userCommand) == 0 || strcmp("y",userCommand) == 0)
+        {
+            printf("Which process would you like to reply to? ");
+            int pid_input;
+            scanf("%d", &pid_input);
+            printf("Enter your reply message: ");
+            scanf("%s",reply);
+            reply_PCB(pid_input,reply);
+        }
+        else if (strcmp("I",userCommand) == 0 || strcmp("i",userCommand) == 0)
+        {
+            printf("enter pid of process to check info: ");
             int input;
             scanf("%d",&input);
             test_prints(input);
         }
-        else if (strcmp("R",userCommand) == 0 || strcmp("r",userCommand) == 0)
+        else if (strcmp("N",userCommand) == 0 || strcmp("n",userCommand) == 0)
         {
-            test_current_running();
+            printf("enter semaphore ID (0-4): ");
+            int sem_ID;
+            scanf("%d",&sem_ID);
+            printf("enter initial value for semaphore %d: ",sem_ID);
+            int initial_value;
+            scanf("%d",&initial_value);
+            if (new_sem(sem_ID, initial_value) == 0)
+                printf("Create new semaphore success.\n");
+        }
+        else if (strcmp("P",userCommand) == 0 || strcmp("p",userCommand) == 0)
+        {
+            printf("enter semaphore ID to execute: ");
+            int sem_id_input;
+            scanf("%d",&sem_id_input);
+            semaphore_P(sem_id_input);
         }
         else if (strcmp("V",userCommand) == 0 || strcmp("v",userCommand) == 0)
         {
+            printf("enter semaphore ID to execute: ");
+            int sem_id_input;
+            scanf("%d",&sem_id_input);
+            semaphore_V(sem_id_input);
+        }
+        else if (strcmp("U",userCommand) == 0 || strcmp("u",userCommand) == 0)
+        {
+            test_current_running();
+        }
+        else if (strcmp("T",userCommand) == 0 || strcmp("t",userCommand) == 0)
+        {
             print_everything_inQueue();
         }
-        else if (strcmp("B",userCommand) == 0 || strcmp("b",userCommand) == 0)
-        {
-            print_blocked_queues();
-        }
     }
+    free(send);
+    free(reply);
+    return 0;
 }

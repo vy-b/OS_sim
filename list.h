@@ -11,29 +11,25 @@
 
 typedef struct Node_s Node;
 struct Node_s {
-    Node* next;
-    Node* prev;
-    void* item;
-    int nodeIndex; // this signifies the index of the node within the (collective pool) array of nodes to track free nodes
-    int parentList; // index of list that this Node belongs to
+    void* pItem;
+    Node* pNext;
+    Node* pPrev;
 };
 
 enum ListOutOfBounds {
     LIST_OOB_START,
-    LIST_OOB_END,
-    LIST_VALID
+    LIST_OOB_END
 };
 
 typedef struct List_s List;
-struct List_s {
-    Node* head;
-    Node* current;
-    Node* tail;
-    int nodeCount; // number of Nodes in list
-    int listIndex; // index of this list within the array of lists to track free lists
-    int inBounds;
+struct List_s{
+    Node* pFirstNode;
+    Node* pLastNode;
+    Node* pCurrentNode;
+    int count;
+    List* pNextFreeHead;
+    enum ListOutOfBounds lastOutOfBoundsReason;
 };
-
 
 // Maximum number of unique lists the system can support
 // (You may modify for your needs)
@@ -110,6 +106,7 @@ void List_concat(List* pList1, List* pList2);
 // It should be invoked (within List_free) as: (*pItemFreeFn)(itemToBeFreedFromNode);
 // pList and all its nodes no longer exists after the operation; its head and nodes are 
 // available for future operations.
+// UPDATED: Changed function pointer type, May 19
 typedef void (*FREE_FN)(void* pItem);
 void List_free(List* pList, FREE_FN pItemFreeFn);
 
@@ -127,6 +124,7 @@ void* List_trim(List* pList);
 // that item is returned. If no match is found, the current pointer is left beyond the end of 
 // the list and a NULL pointer is returned.
 // 
+// UPDATED: Added May 19
 // If the current pointer is before the start of the pList, then start searching from
 // the first node in the list (if any).
 typedef bool (*COMPARATOR_FN)(void* pItem, void* pComparisonArg);
