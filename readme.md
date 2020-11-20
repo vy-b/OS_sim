@@ -1,6 +1,10 @@
 # Interactive Operating System simulation
+## To run:
+**./OS_sim**
 ## some notes on intentional implementation choices/assumptions:
 - A currently running process is NOT removed from its priority queue, but rather stay in the first position. When it gets quantum-ed, it will move to the back of the queue.
+
+- I implemented 3 separate blocked queues for each type of blocked - blocked on send, on receive or on semaphore.
 
 - When a process is blocked, it is removed from its queue and moved to the correct blocked queue (send, receive or semaphore)
 
