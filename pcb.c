@@ -549,7 +549,7 @@ int semaphore_V(int sem_ID)
     }
 
     semaphoreV->val++;
-    if (semaphoreV->val > 0)
+    if (semaphoreV->val >= 0)
     {
         if (List_count(semaphoreV->waiting_processes) == 0)
         {

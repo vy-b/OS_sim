@@ -2,6 +2,8 @@
 ## To run:
 **./OS_sim**
 ## some notes on intentional implementation choices/assumptions:
+- To exit, all processes must be killed/exited. Easiest way to do so would be to use T to see all the existing processes, and use K on each of them. Init is PID 0 if you wish to kill it, else just exit after killing all other processes.
+
 - A currently running process is NOT removed from its priority queue, but rather stay in the first position. When it gets quantum-ed, it will move to the back of the queue.
 
 - I implemented 3 separate blocked queues for each type of blocked - blocked on send, on receive or on semaphore.
