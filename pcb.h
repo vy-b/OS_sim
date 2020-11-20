@@ -11,22 +11,22 @@ typedef enum state
     blocked
 }state_s;
 
-typedef struct PCB_s PCB;
-struct PCB_s
-{
-    int PID;
-    int priority;
-    state_s state;
-    char* msg_received;
-    PCB* sender;
-    
-};
 typedef struct semaphore_s Sem;
 struct semaphore_s
 {
     int ID;
     int val;
     List* waiting_processes;
+};
+
+typedef struct PCB_s PCB;
+struct PCB_s
+{
+    int PID;
+    int priority;
+    state_s state;
+    PCB* sender;
+    Sem* blocker;
 };
 // generate new pid based on its priority
 int generate_newPID(int priority_input);
@@ -98,7 +98,7 @@ void print_everything_inQueue();
 
 /*displays PID, state, priority and place in priority queue of the process whose ID is provided in the parameter. If blocked, 
 display if blocked on send, receive or semaphore.*/
-void test_prints(int pid_input);
+int test_prints(int pid_input);
 
  /*display procinfo of the currently running process*/
 void test_current_running();

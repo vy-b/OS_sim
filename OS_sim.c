@@ -77,6 +77,7 @@ int main()
             scanf("%d",&pid_input);
             printf("what is your message? ");
             scanf("%s",send);
+            printf("\n");
             sendto_PCB(pid_input, send);
             printf("\n");
         }

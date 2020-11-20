@@ -10,6 +10,10 @@
 
 - Reply (Y) does not handle multiple senders, but only the most recent one.
 
+- Send (S) cannot send multiple times. It is blocked immediately after sending.
+
+- Receive (R) only checks for the most recent message.
+
 ### EXTRA:
 **U**: display procinfo of the currently running process
 

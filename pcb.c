@@ -10,6 +10,7 @@ static List* blockedOnSem;
 static int queue0count = 0;
 static int queue1count = 0;
 static int queue2count = 0;
+static char* msg_received = NULL;
 
 // should find the process with the specified pid from the queue
 // returns the queue containing the pid with the current pointer at the specified process
@@ -32,7 +33,6 @@ PCB* find_by_pid(int pid_input, List* searchingQueue)
 
     if (current_process->PID != pid_input && current_pointer == NULL)
     {
-        printf("PID does not exist.\n");
         return NULL;
     }
 
@@ -216,6 +216,10 @@ int kill_PCB(int pid_input)
             }
             return 1; //to signal that init is exiting
         }
+        else 
+        {
+            printf("other processes still exist/blocked, cannot exit.\n");
+        }
     }
 
     // find the searching queue and the process using the find_by_pid function
@@ -232,10 +236,25 @@ int kill_PCB(int pid_input)
             toKill = find_by_pid(pid_input,blockedOnReceive);
             if (toKill == NULL)
             {
-                printf("PID does not exist.\n");
-                return -1;
+                toKill = find_by_pid(pid_input,blockedOnSem);
+                if (toKill == NULL)
+                {
+                    printf("PID does not exist.\n");
+                    return -1;
+                }
+                else
+                {
+                    if (toKill->blocker != NULL)
+                    {
+                        List* waitlist = toKill->blocker->waiting_processes;
+                        find_by_pid(pid_input,waitlist);
+                        List_remove(waitlist);         
+                    }
+                    List_remove(blockedOnSem);
+                }
             }
-            List_remove(blockedOnReceive);
+            else
+                List_remove(blockedOnReceive);
         }
         else
         {
@@ -339,6 +358,7 @@ int sendto_PCB(int sendto_pid, char* msg)
         PCB* blockedReceiver = List_remove(blockedOnReceive);
         List_append(arrayOfQueues[blockedReceiver->priority],blockedReceiver);
         blockedReceiver->state = ready;
+        blockedReceiver->sender = current_running;
         if (current_running == init)
         {
             current_running = blockedReceiver;
@@ -353,10 +373,10 @@ int sendto_PCB(int sendto_pid, char* msg)
         PCB* receiver = find_by_pid(sendto_pid,arrayOfQueues[sendto_pid % 3]);
         if (receiver == NULL)
         {
-            printf("SEND FAILURE: PID does not exist.\n");
+            printf("SEND FAILURE: PID does not exist or process currently blocked.\n");
             return -1;
         }
-        receiver->msg_received = msg;
+        msg_received = msg;
         receiver->sender = current_running;
     }
     // block the sender until a reply is received
@@ -384,12 +404,12 @@ int recvfrom_PCB()
         printf("No running processes.\n");
     }
     PCB* receiver = current_running;
-    if (receiver->msg_received)
+    if (msg_received != NULL)
     {
         printf("message received on currently running process with ID %d from sender %d: %s\n",
-            receiver->PID, receiver->sender->PID,receiver->msg_received);
-        free(receiver->msg_received);
-        receiver->msg_received = NULL;
+            receiver->PID, receiver->sender->PID,msg_received);
+        free(msg_received);
+        msg_received = NULL;
         return 0;
     }
     // block the process if no message is received
@@ -398,6 +418,7 @@ int recvfrom_PCB()
     List_remove(arrayOfQueues[receiver->priority]);
     List_append(blockedOnReceive, receiver);
     printf("Process %d now blocked on receive.\n",receiver->PID);
+    next_process();
     return 0;
 }
 
@@ -501,6 +522,7 @@ int semaphore_P(int sem_ID)
         find_by_pid(current_running->PID,arrayOfQueues[current_running->priority]);
         List_remove(arrayOfQueues[current_running->priority]);
         current_running->state = blocked;
+        current_running->blocker = semaphoreP;
         printf("Blocking process %d, semaphore value negative.\n",current_running->PID);
         next_process();
     }
@@ -533,6 +555,7 @@ int semaphore_V(int sem_ID)
             current_running = wakeProcess;
             wakeProcess->state = running;
         }
+        wakeProcess->blocker = NULL;
         printf("Waking process %d, semaphore value now positive.\n",wakeProcess->PID);
     }
     return 0;
@@ -551,34 +574,68 @@ int semaphore_V(int sem_ID)
 //___________________________________________________________________________________//____________________________________________________________________________________
 //___________________________________________________________________________________//____________________________________________________________________________________
 //___________________________________________________________________________________
-void test_prints(int pid_input)
+int test_prints(int pid_input)
 {
-    int priorityQueueNo = pid_input % 3;
-
-    List* searchingQueue = arrayOfQueues[priorityQueueNo];
-    if (List_count(searchingQueue) == 0)
+    char* queueName = NULL;
+    PCB* toPrint = find_by_pid(pid_input, arrayOfQueues[pid_input%3]);
+    if (toPrint == NULL)
     {
-        printf("PID does not exist.\n");
+        toPrint = find_by_pid(pid_input, blockedOnReceive);
+        if (toPrint == NULL)
+        {
+            toPrint = find_by_pid(pid_input, blockedOnSend);
+            if (toPrint == NULL)
+            {
+                toPrint = find_by_pid(pid_input, blockedOnSem);
+                if (toPrint == NULL)
+                {
+                    printf("Process not found!\n");
+                    free(queueName);
+                    return -1;
+                }
+                else
+                {
+                    queueName = "Blocked on a semaphore";
+                }
+            }
+                
+            else
+            {
+                queueName = "Blocked on Send";
+            }
+        }
+        else
+        {
+            queueName = "Blocked on Receive";
+        }
     }
-    PCB* current_process = List_first(searchingQueue);
-    void* current_pointer = List_next(searchingQueue);
-    int placeInQueue = 0;
-    while (current_process->PID != pid_input && current_pointer!=NULL)
+    else
     {
-        placeInQueue++;
-        current_process = current_pointer;
-        current_pointer = List_next(searchingQueue);
+        queueName = "Priority";
     }
-
-    if (current_process->PID != pid_input && current_pointer == NULL)
-    {
-        printf("Process not found. PID does not exist. Please execute K again with correct ID\n");
-    }
-    PCB* toPrint = List_prev(searchingQueue);
     printf("PID: %d\n",toPrint->PID);
-    printf("state: %d\n",toPrint->state);
+
+    char* state = NULL;
+    if (toPrint->state == 0)
+        state = "running";
+    else if (toPrint->state == 1)
+        state = "ready";
+    else if (toPrint->state == 2)
+        state = "blocked";
+
+    printf("state: %s\n",state);
     printf("priority: %d\n",toPrint->priority);
-    printf("place in queue: %d\n",placeInQueue);
+    printf("process is currently in queue: %s ", queueName);
+
+    if (toPrint->state == 0 || toPrint->state == 1)
+    {
+        printf("%d\n",toPrint->priority);
+    }
+    else
+    {
+        printf("\n");
+    }
+    return 0;
 }
 
 void test_current_running()
