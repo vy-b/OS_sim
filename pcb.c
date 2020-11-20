@@ -373,9 +373,18 @@ int sendto_PCB(int sendto_pid, char* msg)
         PCB* receiver = find_by_pid(sendto_pid,arrayOfQueues[sendto_pid % 3]);
         if (receiver == NULL)
         {
-            printf("SEND FAILURE: PID does not exist or process currently blocked.\n");
-            return -1;
+            receiver = find_by_pid(sendto_pid, blockedOnSend);
+            if (receiver == NULL)
+            {
+                receiver = find_by_pid(sendto_pid, blockedOnSem);
+                if (receiver == NULL)
+                {
+                    printf("SEND FAILURE: PID does not exist or process currently blocked.\n");
+                    return -1;
+                }
+            }
         }
+
         msg_received = msg;
         receiver->sender = current_running;
     }
@@ -510,7 +519,6 @@ int semaphore_P(int sem_ID)
         printf("Semaphore P failed. Sem does not exist/Invalid ID.\n");
         return -1;
     }
-    semaphoreP->val--;
     if (semaphoreP->val <= 0) //block
     {
         if (current_running == init)
@@ -526,6 +534,8 @@ int semaphore_P(int sem_ID)
         printf("Blocking process %d, semaphore value negative.\n",current_running->PID);
         next_process();
     }
+    
+    semaphoreP->val--;
     return 0;
 }
 // asusmption: waking up from semaphore goes to the back of ready queue
